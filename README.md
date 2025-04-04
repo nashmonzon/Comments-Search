@@ -1,4 +1,4 @@
-# Comment Search Challenge – Jobrapido
+# Comment Search Challenge
 
 The goal is to implement a search UI that interacts with a public API and displays filtered comments.
 
