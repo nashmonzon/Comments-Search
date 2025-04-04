@@ -1,103 +1,167 @@
-import Image from "next/image";
+"use client";
+
+import type React from "react";
+import { useState } from "react";
+import SearchBox from "../components/SearchBox";
+import CommentList from "../components/CommentList";
+import { fetchComments } from "../lib/fetchComments";
+import type { Comment } from "../types/comment";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Pagination from "../components/Pagination";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Comment[]>([]);
+  const [allResults, setAllResults] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const ITEMS_PER_PAGE = 5;
+  const totalPages = Math.ceil(allResults.length / ITEMS_PER_PAGE);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.length <= 3) return;
+
+    setLoading(true);
+    setError("");
+    setCurrentPage(1);
+
+    try {
+      const filtered = await fetchComments(query);
+      setAllResults(filtered);
+      setResults(filtered.slice(0, ITEMS_PER_PAGE));
+    } catch {
+      setError("Error fetching comments");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    setResults(allResults.slice(startIndex, startIndex + ITEMS_PER_PAGE));
+    document
+      .getElementById("results-top")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const renderContent = () => {
+    if (loading) return <LoadingState />;
+    if (error) return <ErrorState error={error} />;
+    if (results.length > 0)
+      return (
+        <MainContent
+          results={results}
+          totalPages={totalPages}
+          currentPage={currentPage}
+          handlePageChange={handlePageChange}
+        />
+      );
+    if (query.length > 3) return <NoResults query={query} />;
+    if (query.length > 0) return <MinLengthWarning />;
+    return <StartSearching />;
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <Card className="border-none shadow-xl overflow-hidden">
+        <div className="bg-gradient-to-r from-violet-500 to-purple-600 p-6 rounded-t-lg">
+          <h1 className="text-3xl font-bold text-white mb-2">Comment Search</h1>
+          <p className="text-violet-100">
+            Search through thousands of comments with instant results
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <CardContent className="p-6">
+          <SearchBox
+            query={query}
+            onChange={setQuery}
+            onSubmit={handleSearch}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+          <div id="results-top"></div>
+          {renderContent()}
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
+const LoadingState = () => (
+  <div className="flex flex-col items-center justify-center py-12">
+    <div className="relative">
+      <div className="h-16 w-16 rounded-full border-t-4 border-b-4 border-violet-500 animate-spin"></div>
+      <div className="h-12 w-12 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin absolute top-2 left-2"></div>
+    </div>
+    <p className="mt-4 text-slate-500 animate-pulse">Searching comments...</p>
+  </div>
+);
+
+const ErrorState = ({ error }: { error: string }) => (
+  <Alert variant="destructive" className="my-4">
+    <AlertCircle className="h-4 w-4" />
+    <AlertDescription>{error}</AlertDescription>
+  </Alert>
+);
+
+const MainContent = ({
+  results,
+  totalPages,
+  currentPage,
+  handlePageChange,
+}: {
+  results: Comment[];
+  totalPages: number;
+  currentPage: number;
+  handlePageChange: (page: number) => void;
+}) => (
+  <>
+    <CommentList comments={results} />
+    {totalPages > 1 && (
+      <div className="mt-6">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+    )}
+  </>
+);
+
+const NoResults = ({ query }: { query: string }) => (
+  <div className="text-center py-12">
+    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+      <span className="text-2xl">🔍</span>
+    </div>
+    <h3 className="text-lg font-medium text-slate-800 mb-2">
+      No results found
+    </h3>
+    <p className="text-slate-500">
+      We couldn&apos;t find any comments matching &quot;{query}&quot;
+    </p>
+  </div>
+);
+
+const MinLengthWarning = () => (
+  <div className="text-center py-8 text-slate-500">
+    <p>Please enter at least 4 characters to search</p>
+  </div>
+);
+
+const StartSearching = () => (
+  <div className="flex flex-col items-center justify-center py-12 text-center">
+    <div className="w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center mb-4">
+      <span className="text-3xl">💬</span>
+    </div>
+    <h3 className="text-lg font-medium text-slate-800 mb-2">Start searching</h3>
+    <p className="text-slate-500 max-w-md">
+      Enter a search term above to find comments containing specific text
+    </p>
+  </div>
+);
