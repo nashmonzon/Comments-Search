@@ -27,12 +27,18 @@ The goal is to implement a search UI that interacts with a public API and displa
 
 ---
 
-## 🚀 How to run
+## 🚀 Run Instructions with Docker
 
-### Using Docker
+### 1. Clone the repository
 
 ```bash
+git clone git@github.com:nashmonzon/Comments-Search.git
+cd Comments-Search
+```
+```bash
 docker build -t comment_search:latest .
+```
+```bash
 docker run -p 8080:8080 comment_search:latest
 ```
 Visit http://localhost:8080
