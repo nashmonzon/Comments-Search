@@ -23,7 +23,6 @@ The goal is to implement a search UI that interacts with a public API and displa
 - 📄 Returns a **maximum of 20 results**
 - 📬 Displays `name`, `email`, and a summary of `body` (up to 64 characters)
 - 💬 Modal dialog to expand the comment
-- 🧠 Typeahead bonus: shows previous searches as suggestions (optional bonus implemented)
 - 📦 Fully Dockerized – runs in a container on port `8080`
 
 ---
