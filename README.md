@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Comment Search Challenge – Jobrapido
 
-## Getting Started
+The goal is to implement a search UI that interacts with a public API and displays filtered comments.
 
-First, run the development server:
+---
+
+## 📦 Stack
+
+- **Next.js 15 (App Router)**
+- **React**
+- **TypeScript**
+- **TailwindCSS + shadcn/ui**
+- **Jest** for testing
+- **Docker** for containerization
+
+---
+
+## ✨ Features
+
+- 🔍 Search for comments by a specific text inside their `body`
+- ✅ Search is triggered **only on form submit**
+- 🚫 Does nothing if the query is 3 characters or fewer
+- 📄 Returns a **maximum of 20 results**
+- 📬 Displays `name`, `email`, and a summary of `body` (up to 64 characters)
+- 💬 Modal dialog to expand the comment
+- 🧠 Typeahead bonus: shows previous searches as suggestions (optional bonus implemented)
+- 📦 Fully Dockerized – runs in a container on port `8080`
+
+---
+
+## 🚀 How to run
+
+### Using Docker
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker build -t comment_search:latest .
+docker run -p 8080:8080 comment_search:latest
+```
+Visit http://localhost:8080
+
+## 🧪 Testing
+This project uses Jest for testing.
+Tests are focused on the most critical logic: filtering and limiting results.
+
+To run tests:
+```bash
+npx jest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Project structure
+```bash
+/app             → Next.js App Router entry point
+/components      → UI components
+/lib             → Logic (fetching, helpers)
+/types           → Shared types
+/utils           → Utility functions (e.g., getAvatarColor, truncate)
+__tests__        → Unit tests (Jest)
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 👤 Author
+Ignacio Monzón
+linkedin.com/in/ignaciomonzon
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
